@@ -1,6 +1,6 @@
 # PSDT.Location
 
-[![Build status](https://ci.appveyor.com/api/projects/status/94c7i1r3ivtkiwak/branch/master?svg=true&passingText=Build%20Passing&failingText=Build%20Failing&pendingText=Build%20Pending)](https://ci.appveyor.com/project/codecraftteam/PSDT-VisualStudio)
+[![Build status](https://ci.appveyor.com/api/projects/status/4wgo3pccxoy1jhny/branch/master?svg=true&passingText=Build%20Passing&failingText=Build%20Failing&pendingText=Build%20Pending)](https://ci.appveyor.com/project/codecraftteam/PSDT-Location)
 
 A collection of current position and navigation related PowerShell cmdlets, which improves .NET developers productivity.
 
