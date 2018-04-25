@@ -20,7 +20,8 @@ Function global:TabExpansion($line, $lastWord) {
 }
 
 function Get-KnownPath {
-  Get-Directory @args | Where-Object { ($_.FullName -notmatch "\\packages\\") -and ($_.FullName -notmatch "//packages//"); };
+  $filter = ".*{0}.*" -f ($args -join ".*");
+  return Get-ChildItem .\ -Recurse -Directory | Where-Object { $_.FullName -match $filter; };
 }
 
 <#
@@ -67,12 +68,15 @@ d-----        3/15/2018   8:43 AM                en-US
 
 #>
 function Enter-Location {
+  Set-Location -StackName $null;
+
   if (Test-Path $args[$args.Length - 1]) {
     Push-Location $args[$args.Length - 1];
   }
   else {
     $knownPath = Get-KnownPath @args | Select-Object -First 1 -ExpandProperty FullName;
-    Push-Location $knownPath;
+    # Push-Location cannot add a location to the unnamed default stack unless it is the current location stack.
+    Push-Location $knownPath -StackName "PSDT";
   }
 }
 Set-Alias el Enter-Location;

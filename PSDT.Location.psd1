@@ -6,7 +6,7 @@
     CompanyName = 'codecraft.team'
     Copyright = '(c) 2017 codecraft.team. All rights reserved.'
     Description = 'A collection of PSDrive location related PowerShell developer tools.'
-    RequiredModules = @("PSDT.App")
+    RequiredModules = @()
     FunctionsToExport = @("Enter-Location")
     CmdletsToExport = @("*-*")
     VariablesToExport = '*'
