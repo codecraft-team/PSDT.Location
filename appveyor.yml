@@ -43,8 +43,8 @@
 -
   branches:
     only:
-      - /feature-.*/
-      - /hotfix-.*/
+      - /feature.*/
+      - /hotfix.*/
   version: 1.0.{build}
   skip_tags: true
   clone_folder: c:\Projects\PSDT.Location
