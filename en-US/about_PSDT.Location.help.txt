@@ -1,0 +1,33 @@
+TOPIC
+        about_PSDT.Location
+        
+SHORT DESCRIPTION
+        PSDT.Location is a collection of PowerShell cmdlets, which improves developer productivity.
+
+LONG DESCRIPTION
+        The PowerShell Developer Tools for Location simplifies navigation within one PSDrive.
+        
+        PSDT.Location is shipped with a built-in (nested) module, which is intended to encapsulate 
+        common PSDT application logic. 
+         
+        The following functionality is supported:
+        
+        * Finding container child items of current location
+        * Use wildcard and/or words to filter child items
+        * Navigate directly to child item (uses Push-Location under the hood)
+
+CONTRIBUTE
+
+        PSDT.Location is open source on GitHub:
+        
+        https://github.com/codecraft-team/PSDT.Location
+        
+        As you use the module and find what you believe to be are bugs,
+        please submit them to:
+        
+        https://github.com/codecraft-team/PSDT.Location/issues
+        
+        Better yet, fix the bug and submit a pull request.
+        
+SEE ALSO
+        Jump-Location

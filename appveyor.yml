@@ -1,0 +1,83 @@
+# Configuration for "master" branch.
+-
+  branches:
+    only:
+      - master
+  version: 1.0.{build}
+  pull_requests:
+    do_not_increment_build_number: false
+  clone_folder: c:\Projects\PSDT.Location
+  environment:
+    AppVeyorAuthorizationToken: 
+      secure: OrebyRkAy4ednvuV5k7tIRiznarnvdR9uuzRBmfLvUM=
+    PSGalleryApiKey:
+      secure: OjHPlCLymuPqBe7wD9IQVRbWWJtTjmjUaT4gN/Rqyp7hdaFtv1NQcxGC/FWqlM9t
+  init:
+  - ps: >-
+      Install-PackageProvider -Name NuGet -MinimumVersion '2.8.5.201' -Force;
+      Import-PackageProvider NuGet -MinimumVersion '2.8.5.201';
+      Set-PSRepository -Name PSGallery -InstallationPolicy Trusted;
+      Install-Module -Name PSScriptAnalyzer;
+      Install-Module -Name PSDT.AppVeyor;
+      Install-Module -Name PSDT.App;
+  build_script:
+  - ps: >-
+      Invoke-PSDTPreBuild;
+  test: off
+  on_success:
+  - ps: >-
+      Invoke-PSDTPostBuild -Module PSDT.Location;
+  notifications:
+  - provider: Slack
+    incoming_webhook:
+      secure: F+obg+NDF6+5yF54qZZj7x39t7gUd3oNO1mFHiPnuNgGJL1wWSw/3lxT2jnd4Yi66BssEGOkx/IxSA7K/dkOc7xC1eo/6Z5Urb5NMF9+UFA=
+    template: >-
+      <{{buildUrl}}|PSDT.Location Release Build {{buildVersion}} {{status}}>
+
+      Commit <{{commitUrl}}|{{commitId}}> by {{commitAuthor}} on {{commitDate}}
+    on_build_success: true
+    on_build_failure: true
+    on_build_status_changed: false
+
+# Configuration for all "feature-" branches.
+-
+  branches:
+    only:
+      - /feature.*/
+      - /hotfix.*/
+  version: 1.0.{build}
+  skip_tags: true
+  clone_folder: c:\Projects\PSDT.Location
+  environment:
+    AppVeyorAuthorizationToken: 
+      secure: OrebyRkAy4ednvuV5k7tIRiznarnvdR9uuzRBmfLvUM=
+    PSGalleryApiKey: 
+  init:
+  - ps: >-
+      Install-PackageProvider -Name NuGet -MinimumVersion '2.8.5.201' -Force;
+      Import-PackageProvider NuGet -MinimumVersion '2.8.5.201';
+      Set-PSRepository -Name PSGallery -InstallationPolicy Trusted;
+      Install-Module -Name PSScriptAnalyzer;
+      Install-Module -Name PSDT.AppVeyor;
+      Install-Module -Name PSDT.App;      
+  build_script:
+  - ps: >-
+      Invoke-PSDTPreBuild;
+  test: off
+  notifications:
+  - provider: Slack
+    incoming_webhook:
+      secure: F+obg+NDF6+5yF54qZZj7x39t7gUd3oNO1mFHiPnuNgGJL1wWSw/3lxT2jnd4Yi66BssEGOkx/IxSA7K/dkOc7xC1eo/6Z5Urb5NMF9+UFA=
+    template: >-
+      <{{buildUrl}}|PSDT.Location Feature/Hotfix Build {{buildVersion}} {{status}}>
+
+      Commit <{{commitUrl}}|{{commitId}}> by {{commitAuthor}} on {{commitDate}}
+    on_build_success: true
+    on_build_failure: true
+    on_build_status_changed: false
+
+# "fall back" configuration for all other branches
+# no "branches" section defined
+# do not deploy at all
+-
+  configuration: Debug
