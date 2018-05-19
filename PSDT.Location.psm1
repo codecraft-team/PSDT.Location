@@ -71,12 +71,11 @@ function Enter-Location {
   Set-Location -StackName $null;
 
   if (Test-Path $args[$args.Length - 1]) {
-    Push-Location $args[$args.Length - 1];
+    Push-LocationToGlobalStack $args[$args.Length - 1];
   }
   else {
     $knownPath = Get-KnownPath @args | Select-Object -First 1 -ExpandProperty FullName;
-    # Push-Location cannot add a location to the unnamed default stack unless it is the current location stack.
-    Push-Location $knownPath -StackName "PSDT";
+    Push-LocationToGlobalStack $knownPath;
   }
 }
 Set-Alias el Enter-Location;
