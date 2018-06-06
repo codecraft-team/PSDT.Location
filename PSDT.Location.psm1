@@ -26,10 +26,10 @@ function Get-KnownPath {
 
 <#
 .SYNOPSIS
-  Looks for matchin child items based on the parameters and sets the current location to the first matching location.
-  The cmdlet supports tab completion to show every matching child item.
+  Looks for child items, based on the parameters and sets the current location to the first matching location.
+  If no matching child items were found, the cmdlet looks in the parent directory. This continues until the first match or the root of the PSDrive is reached.
 .DESCRIPTION
-  The cmdlet uses the Pop-Location cmdlet to enter the selected location.
+  The cmdlet uses the Push-Location cmdlet to enter the selected location i.e. Push-Location can be used to navigate back in the global navigation stack.
 .EXAMPLE
   Consider the following child item structure:
 
@@ -66,6 +66,17 @@ d-----        3/15/2018   8:43 AM                en-US
   By pressing the enter, the location will be pushed:
     PS R:\PSDT.Location\en-US> 
 
+.EXAMPLE
+  The following example shows how a location can be reached, which is outside the child directory branch.
+  Consider the following child item structure:
+
+    Directory: R:\PSDT.Location
+    Directory: R:\PSDT.Location\en-US
+    Directory: R:\PSDT.VisualStudio
+    Directory: R:\PSDT.VisualStudio\Tests
+  
+    PS R:\PSDT.Location\en-US> Enter-Location Tests
+    PS R:\PSDT.VisualStudio\Tests>
 #>
 function Enter-Location {
   Set-Location -StackName $null;
@@ -75,6 +86,13 @@ function Enter-Location {
   }
   else {
     $knownPath = Get-KnownPath @args | Select-Object -First 1 -ExpandProperty FullName;
+    if(-not $knownPath) {
+      $previousPath = $Null; 
+      while(-not $knownPath -and $previousPath -ne $PWD.Path) { 
+        $previousPath = $PWD.Path; Push-Location ..; 
+        $knownPath = Get-KnownPath @args | Select-Object -First 1 -ExpandProperty FullName;
+      }
+    }
     Push-LocationToGlobalStack $knownPath;
   }
 }
