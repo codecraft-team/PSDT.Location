@@ -93,7 +93,6 @@ function Enter-Location {
     if($global:PSDTLocationConfiguration.EnableParentLocation -and -not $knownPath) {
       $previousPath = $Null; 
       while(-not $knownPath -and $previousPath -ne $PWD.Path) { 
-        Write-Host $PWD.Path;
         $previousPath = $PWD.Path; Push-Location ..; 
         $knownPath = Get-KnownPath @args | Select-Object -First 1 -ExpandProperty FullName;
       }
