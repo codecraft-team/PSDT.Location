@@ -1,3 +1,5 @@
+$global:PSDTLocationConfiguration = Get-Content -Path (Join-Path -Path $PSScriptRoot -ChildPath "config.json") -Raw | ConvertFrom-Json;
+
 if (-not (Test-Path PreEnterLocationTabExpansion) -and (Test-Path Function:\TabExpansion)) {
   Rename-Item Function:\TabExpansion PreEnterLocationTabExpansion
 }
@@ -6,10 +8,12 @@ Function global:TabExpansion($line, $lastWord) {
   $cmdletStartIndex = ([string]$line).LastIndexOf('|') + 1;
   $cmdlet = ([string]$line).Substring($cmdletStartIndex).TrimStart();
   $filter = ($cmdlet -split " " | Select-Object -Skip 1) -join ".*";
-   
+
+  $enterLocationAliases = (Get-Alias -Definition Enter-Location -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name) -join "|";
+  $enterLocationPattern = ("Enter-Location", $enterLocationAliases | Where-Object { $_.Length -gt 0 }) -join "|";
   switch -regex ($cmdlet) {
-    "^(Enter-Location|el) .*" {
-      Get-KnownPath $filter | Select-Object -ExpandProperty FullName
+    "^($enterLocationPattern) .*" {
+      Get-KnownPath $filter | Select-Object -ExpandProperty FullName -First $global:PSDTLocationConfiguration.MaximumTabCompletionItems;
     }
     default {
       if (Test-Path Function:\PreEnterLocationTabExpansion) {
@@ -86,7 +90,7 @@ function Enter-Location {
   }
   else {
     $knownPath = Get-KnownPath @args | Select-Object -First 1 -ExpandProperty FullName;
-    if(-not $knownPath) {
+    if($global:PSDTLocationConfiguration.EnableParentLocation -and -not $knownPath) {
       $previousPath = $Null; 
       while(-not $knownPath -and $previousPath -ne $PWD.Path) { 
         $previousPath = $PWD.Path; Push-Location ..; 
