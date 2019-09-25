@@ -13,7 +13,7 @@ Function global:TabExpansion($line, $lastWord) {
   $enterLocationPattern = ("Enter-Location", $enterLocationAliases | Where-Object { $_.Length -gt 0 }) -join "|";
   switch -regex ($cmdlet) {
     "^($enterLocationPattern) .*" {
-      Get-KnownPath $filter | Select-Object -ExpandProperty FullName -First $global:PSDTLocationConfiguration.MaximumTabCompletionItems;
+      Get-KnownPath -Path $PWD.Path $filter | Select-Object -ExpandProperty FullName -First $global:PSDTLocationConfiguration.MaximumTabCompletionItems;
     }
     default {
       if (Test-Path Function:\PreEnterLocationTabExpansion) {
@@ -24,8 +24,9 @@ Function global:TabExpansion($line, $lastWord) {
 }
 
 function Get-KnownPath {
-  $filter = ".*{0}.*" -f ($args -join ".*");
-  return Get-ChildItem .\ -Recurse -Directory | Where-Object { $_.FullName -match $filter; };
+  $filterArgs = $args | Select-Object -Skip 2
+  $filter = ".*{0}.*" -f ($filterArgs -join ".*");
+  return Get-ChildItem -Path $args[1] -Recurse | Where-Object { $_.PSIsContainer -and $_.FullName -match $filter; };
 }
 
 <#
@@ -83,21 +84,27 @@ d-----        3/15/2018   8:43 AM                en-US
     PS R:\PSDT.VisualStudio\Tests>
 #>
 function Enter-Location {
-  Set-Location -StackName $null;
+  Set-Location -StackName $null
 
   if (Test-Path $args[$args.Length - 1]) {
-    Push-LocationToGlobalStack $args[$args.Length - 1];
+    Push-LocationToGlobalStack $args[$args.Length - 1]
   }
   else {
-    $knownPath = Get-KnownPath @args | Select-Object -First 1 -ExpandProperty FullName;
+    $knownPath = Get-KnownPath -Path $PWD.Path @args | Select-Object -First 1 -ExpandProperty FullName
     if($global:PSDTLocationConfiguration.EnableParentLocation -and -not $knownPath) {
-      $previousPath = $Null; 
-      while(-not $knownPath -and $previousPath -ne $PWD.Path) { 
-        $previousPath = $PWD.Path; Push-Location ..; 
-        $knownPath = Get-KnownPath @args | Select-Object -First 1 -ExpandProperty FullName;
+      $parentPath = $PWD.Path
+      while(-not $knownPath -and $PWD.Drive.Root -ne $parentPath) { 
+        $parentPath = Join-Path -Path $parentPath -ChildPath ".." -Resolve
+        $knownPath = Get-KnownPath -Path $parentPath @args | Select-Object -First 1 -ExpandProperty FullName
       }
     }
-    Push-LocationToGlobalStack $knownPath;
+    
+    if(-not $knownPath -or -not (Test-Path -Path $knownPath)) {
+      Write-Warning "Not found any matching path. Location was not changed."
+      return
+    }
+
+    Push-LocationToGlobalStack $knownPath
   }
 }
-Set-Alias el Enter-Location;
+Set-Alias el Enter-Location
